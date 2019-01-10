@@ -19,19 +19,17 @@ def main():
 
     ps, fs = len(probabilities_survived) / len(processed_data), len(probabilities_died) / len(processed_data)
 
-    processed_data['Prediction'] = processed_data.drop('Survived', axis=1).apply(lambda fs: predict(fs, ps, fs, probabilities_survived, probabilities_died), axis=1)
-    processed_data['Correct'] = np.where(processed_data['Survived'] == processed_data['Prediction'], 1, 0)
+    processed_data['Prediction'] = processed_data.drop(class_column, axis=1).apply(lambda fs: predict(fs, ps, fs, probabilities_survived, probabilities_died), axis=1)
+    processed_data['Correct'] = np.where(processed_data[class_column] == processed_data['Prediction'], 1, 0)
     
     accuracy = processed_data['Correct'].sum() / len(processed_data)
     print(f'Accuracy: {accuracy}')
     plt.show()
 
-
-def predict(features, ps, pf, fpgs, fpgf):
-    # Probability for features given success: P(f0...fn | class = 1)
-    pfgs = functools.reduce(operator.mul, [fpgs[i][features[i]] if features[i] in fpgs[i] else (1 / len(fpgs[i])) for i in range(len(features))])
-    # Probability for features given failure: P(f0...fn | class = 0)
-    pfgf = functools.reduce(operator.mul, [fpgf[i][features[i]] if features[i] in fpgf[i] else (1 / len(fpgf[i])) for i in range(len(features))])
+# predict(features, p(y = Success), p(y = Failure), [p(xi | y = Success)], [p(xi | y = Failure)])
+def predict(fs, ps, pf, fpgs, fpgf):
+    pfgs = functools.reduce(operator.mul, [fpgs[i][fs[i]] if fs[i] in fpgs[i] else (1 / len(fpgs[i])) for i in range(len(fs))])
+    pfgf = functools.reduce(operator.mul, [fpgf[i][fs[i]] if fs[i] in fpgf[i] else (1 / len(fpgf[i])) for i in range(len(fs))])
 
     probability_success = pfgs * ps / ((pfgs * ps) + (pfgf * pf))
     probability_failure = pfgf * pf / ((pfgf * pf) + (pfgs * ps))
