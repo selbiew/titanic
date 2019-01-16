@@ -3,9 +3,7 @@ import pandas as pd
 
 class SupportVectorMachine:
     def __init__(self, max_iterations=5000, C=0.1):
-        self.alphas = None
         self.weights = None
-        self.intercept = None
         self.C = C
         self.max_iterations = max_iterations
 
